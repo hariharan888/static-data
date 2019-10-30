@@ -1,0 +1,37 @@
+{
+  "name": "static-data",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon --exec babel-node index.js",
+    "start2": "node -r esm index.js",
+    "exec": "node -r esm"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hariharan888/static-data.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/hariharan888/static-data/issues"
+  },
+  "homepage": "https://github.com/hariharan888/static-data#readme",
+  "dependencies": {
+    "babel-node": "^0.0.1-security",
+    "crypto-js": "^3.1.9-1",
+    "esm": "^3.2.25",
+    "lodash": "^4.17.15",
+    "realm": "^2.23.0-hotfix.1",
+    "rxjs": "^6.5.3"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.0.0-rc.1",
+    "@babel/core": "^7.0.0-rc.1",
+    "@babel/node": "^7.0.0-rc.1",
+    "@babel/preset-env": "^7.0.0-rc.1",
+    "nodemon": "^1.19.4"
+  }
+}
