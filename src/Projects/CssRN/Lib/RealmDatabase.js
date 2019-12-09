@@ -16,7 +16,8 @@ const StorySchema = {
     categories: "Category[]",
     content: "string[]",
     verse: "string",
-    verseRef: "string"
+    verseRef: "string",
+    favourite: { type: "bool", default: false }
   }
 };
 
@@ -26,6 +27,8 @@ const CategorySchema = {
   properties: {
     id: "int",
     name: "string",
+    iconName: "string",
+    iconType: "string",
     stories: {
       type: "linkingObjects",
       objectType: "Story",

@@ -1,14 +1,13 @@
 import fs from "fs";
 import _ from "lodash";
-import Realm from "realm";
-import db from "../Lib/RealmDatabase";
+import sqlite3 from "sqlite3";
+import db from "../Lib/SqliteDatabase";
 import { RootDirectory } from "../../../Config/Constants";
 
 /*--------------------------------------------------------------------*/
-// 1. Seed ~ 220 stories to realm database
+// 1. Seed ~ 220 stories to sqlite database
 /*--------------------------------------------------------------------*/
 
-let data = null;
 const inputPath = `${RootDirectory}/src/Projects/CssRN/Local/InitialData.json`;
 
 const iconMap = {
@@ -29,7 +28,7 @@ const iconMap = {
   Truthfulness: { iconType: "fa", iconName: "thumbs-o-up" }
 };
 
-// mc: MaterialCommunityIcons,
+//   mc: MaterialCommunityIcons,
 //   sli: SimpleLineIcons,
 //   oct: Octicons,
 //   fa: FontAwesome,
@@ -90,15 +89,6 @@ const verifyStories = () => {
   console.log("Total stories: ", db.objects("Story").length);
 };
 
-// id: "int",
-// title: "string",
-// source: "string",
-// language: "string",
-// categories: "Category[]",
-// content: "string[]",
-// verse: "string",
-// verseRef: "string"
-
 export const doTask = () => {
   fs.readFile(inputPath, function(err, buf) {
     if (err) {
@@ -108,10 +98,19 @@ export const doTask = () => {
     // const str = buf.toString();
     // data = JSON.parse(str);
     // seedCategories(data.categories);
-    verifyCategories();
-    // seedStories(data.stories);
-    verifyStories();
-    process.exit(); // due to realm import: https://github.com/realm/realm-js/issues/1387
+    // verifyCategories();
+    // // seedStories(data.stories);
+    // verifyStories();
+    let sql = `SELECT * FROM categories`;
+
+    db.all(sql, [], (err, rows) => {
+      if (err) {
+        throw err;
+      }
+      rows.forEach(row => {
+        console.log(row);
+      });
+    });
     return;
   });
 };
