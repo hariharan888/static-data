@@ -2,3 +2,5 @@
 *.log
 
 **/Local/*
+
+*.sqlite3

@@ -8,9 +8,10 @@ import moment from "moment";
 /*--------------------------------------------------------------------*/
 
 const inputPath = `${RootDirectory}/src/Projects/CssRN/Local/InitialData.json`;
-const outputPath = `${RootDirectory}/src/Projects/CssRN/Local/md`;
+const mdOutputPath = `${RootDirectory}/src/Projects/CssRN/Local/md`;
+const jsonOutputPath = `${RootDirectory}/src/Projects/CssRN/Local/json`;
 
-const parseStory = (story, categories) => {
+const getMdStr = (story, categories) => {
   const {
     title,
     content,
@@ -45,14 +46,40 @@ ${explanation}
   `;
 };
 
+const getSlug = str =>
+  str
+    .replace(/[\!@#\$%^&\*\(\)\,\s”\\\.;\?]/g, "-")
+    .replace(/-{2,}/g, "-")
+    .replace(/^-/, "")
+    .replace(/-$/, "");
+
+const getCategoryListData = (stories, categories) => {
+  const storyWithCategories = _.map(stories, story => {
+    const storyCategories = _.map(story.categories, id =>
+      _.chain(categories)
+        .toPairs()
+        .find((k, v) => v === id)
+        .head()
+        .value()
+    );
+    return { ...story, categories: storyCategories };
+  });
+  return _.chain(categories)
+    .map((i, c) => {
+      const storyPaths = _.chain(storyWithCategories)
+        .filter(st => _.includes(st.categories, c))
+        .map(st => ({ path: getSlug(st.title) }))
+        .value();
+      return [c, storyPaths];
+    })
+    .fromPairs()
+    .value();
+};
+
 const writeToFiles = async data => {
   const promises = _.map(data, async ({ story, parsedStory }) => {
-    const folderName = story.title
-      .replace(/[\!@#\$%^&\*\(\)\,\s”\\\.;\?]/g, "-")
-      .replace(/-{2,}/g, "-")
-      .replace(/^-/, "")
-      .replace(/-$/, "");
-    const folderPath = `${outputPath}/${folderName}`;
+    const folderName = getSlug(story.title);
+    const folderPath = `${mdOutputPath}/${folderName}`;
     if (!fs.existsSync(folderPath)) {
       fs.mkdirSync(folderPath);
     }
@@ -68,6 +95,33 @@ const writeToFiles = async data => {
   return;
 };
 
+const prepareMdFiles = async (stories, categories) => {
+  const mdData = _.map(stories, story => {
+    const storyCategories = _.map(story.categories, id =>
+      _.chain(categories)
+        .toPairs()
+        .find((k, v) => v === id)
+        .head()
+        .value()
+    );
+    const parsedStory = getMdStr(story, storyCategories);
+    return { story, parsedStory };
+  });
+
+  await writeToFiles(mdData);
+  return;
+};
+
+const prepareCategoryIndex = async (stories, categories) => {
+  const data = getCategoryListData(stories, categories);
+  const error = await fs.writeFile(
+    `${jsonOutputPath}/categoriesWithStoryPath.json`,
+    JSON.stringify(data),
+    err => err
+  );
+  return error;
+};
+
 export const doTask = () => {
   fs.readFile(inputPath, async (err, buf) => {
     if (err) {
@@ -77,19 +131,8 @@ export const doTask = () => {
     const str = buf.toString();
     const data = JSON.parse(str);
     const { categories, stories } = data;
-    const mdData = _.map(stories, story => {
-      const storyCategories = _.map(story.categories, id =>
-        _.chain(categories)
-          .toPairs()
-          .find((k, v) => v === id)
-          .head()
-          .value()
-      );
-      const parsedStory = parseStory(story, storyCategories);
-      return { story, parsedStory };
-    });
-
-    await writeToFiles(mdData);
+    // await prepareMdFiles(stories, categories);
+    await prepareCategoryIndex(stories, categories);
     return;
   });
 };

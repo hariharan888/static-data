@@ -23,11 +23,12 @@
     "babel-node": "^0.0.1-security",
     "crypto-js": "^3.1.9-1",
     "esm": "^3.2.25",
+    "knex": "^0.20.8",
     "lodash": "^4.17.15",
     "moment": "^2.24.0",
     "realm": "^2.23.0-hotfix.1",
     "rxjs": "^6.5.3",
-    "sqlite3": "^4.1.0"
+    "sqlite3": "^4.1.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.0.0-rc.1",
