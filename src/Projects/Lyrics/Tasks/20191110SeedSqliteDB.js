@@ -5,6 +5,11 @@ import { RootDirectory } from "../../../Config/Constants";
 
 const { inputDb, outputDb } = Db;
 
+const dropJsonTable = () => {
+  const sql = `DROP TABLE IF EXISTS json_songs;`;
+  return outputDb.raw(sql);
+};
+
 const createJsonTable = () => {
   const sql = `CREATE TABLE IF NOT EXISTS json_songs(
     id INTEGER NOT NULL,
@@ -21,6 +26,7 @@ const verifyLyrics = async () => {
   console.log("inputDb songs", inputDbSongs.length);
   const outputDbSongs = await outputDb("json_songs");
   console.log("outputDb songs", outputDbSongs.length);
+  console.log("outputDb songs", outputDbSongs[0]);
 };
 
 const temp = async () => {
@@ -42,7 +48,7 @@ const temp = async () => {
 // total: 9656
 // grouped: [ [ 1631, '1' ], [ 8025, '2' ] ]
 const getFinalJson = async (songId = 1) => {
-  const song = await inputDb("json_songs").where({ id: songId });
+  const song = await inputDb("json_songs").where({ song_id: songId });
   // console.log("song", song);
   const authors = await inputDb
     .select("*")
@@ -95,11 +101,31 @@ const getFinalJson = async (songId = 1) => {
     title: parsedTitle,
     lyrics: parsedLyrics
   };
-  console.log("final", final);
+  // console.log("final", final);
+  return final;
+};
+
+const seedSong = async songId => {
+  const json = await getFinalJson(songId);
+  console.log("Doing", songId);
+  return outputDb("json_songs").insert({
+    data: JSON.stringify(json),
+    song_id: songId,
+    id: songId
+  });
+};
+
+const seedFinalSongs = async () => {
+  const songs = await inputDb("json_songs");
+  return songs.reduce(async (previousPromise, song) => {
+    await previousPromise;
+    return seedSong(song.song_id);
+  }, Promise.resolve());
 };
 
 export const doTask = async () => {
+  await dropJsonTable();
   await createJsonTable();
-  await getFinalJson();
+  await seedFinalSongs();
   await verifyLyrics();
 };
